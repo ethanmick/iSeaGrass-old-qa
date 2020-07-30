@@ -37,7 +37,7 @@ export interface Weather {
 // What is this?
 export interface IndicatorShoot {}
 
-export interface Indicator {
+export interface Sample {
   units: 'm'
   picture: boolean
   pictureTakenAt: Date
