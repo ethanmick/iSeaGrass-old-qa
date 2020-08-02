@@ -1,7 +1,6 @@
-import { ChevronLeft } from 'components'
+import { ChevronLeft, DataError, Loading } from 'components'
 import { Weather } from 'components/Weather'
-import { usePosition, useTrip } from 'hooks'
-import { useQuery } from 'hooks/useQuery'
+import { useStation } from 'hooks'
 import { Station } from 'models'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -13,74 +12,22 @@ import {
   Form,
   FormGroup,
   Input,
-  Label,
-  Row
+  Label
 } from 'reactstrap'
 
-// StationState holds the station data as easily editable strings for React
-// components.
-interface StationState {
-  id: string
-  latitude: string
-  longitude: string
-  gpsDevice: string
-  harbor: string
-  isIndicatorStation: boolean
-}
-
-const toState = (s: Station) => ({
-  ...s,
-  id: s.id ? `${s.id}` : '',
-  latitude: s.latitude ? `${s.latitude}` : '',
-  longitude: s.longitude ? `${s.longitude}` : ''
-})
-
-const DEFAULT = {
-  id: '',
-  latitude: '',
-  longitude: '',
-  gpsDevice: '',
-  harbor: '',
-  isIndicatorStation: false
-}
-
-// Station Page
-// Requires tripId
-// If stationId is present, load that station, otherwise create a new station
-// TODO: Fix when offline mode works with [id]
 export default () => {
   const router = useRouter()
-  const tripId = useQuery('id')
-  const queryStationId = useQuery('stationId')
-  const [stationId, setStationId] = useState(queryStationId)
-  const [station, setStation] = useState<StationState>(DEFAULT)
-  const { loading, trip, db } = useTrip(tripId)
-
-  // const { loading, trip, station, db } = useStation()
-
-  console.log('sttion iddd', queryStationId, stationId)
-  console.log('trip', loading, trip)
-
+  const { loading, db, value, error } = useStation()
+  const [station, setStation] = useState<Station>(undefined)
   useEffect(() => {
-    if (stationId) {
-      setStation(toState(trip.stations[stationId]))
-    }
-  }, [stationId, trip])
+    if (value) setStation(value)
+  }, [value])
 
   // TODO: Move to a component
-  const { latitude, longitude, error } = usePosition()
+  //const { latitude, longitude, error: gpsError } = usePosition()
   // useWeather()
 
   /*
-  useEffect(() => {
-    setTripId(param(router, 'tripId'))
-    setStationId(param(router, 'stationId'))
-    if (trip) {
-      setStation(toState(trip.stations[stationId]))
-    }
-  }, [router.query.id])
-  */
-
   useEffect(() => {
     if (latitude || longitude) {
       setStation({
@@ -91,28 +38,25 @@ export default () => {
       })
     }
   }, [latitude, longitude])
+  */
 
-  // Trip ID is a required param
-  if (!loading && !tripId) {
+  if (error) return <DataError error={error.message} />
+  if (loading) return <Loading />
+  if (!loading && !station) {
     router.replace('/')
+    return null
   }
 
   const save = async (e?: React.FormEvent) => {
     e?.preventDefault()
-    if (!stationId) {
-      setStationId(trip.stations.push(station) - 1)
-    } else {
-      trip.stations[stationId] = station
-    }
-    await db.put('trips', trip)
   }
 
   return (
     <>
       <div className="py-2">
         <Link
-          href={{ pathname: '/trips', query: { id: tripId } }}
-          as={`/trips?id=${tripId}`}
+          href={{ pathname: '/trips', query: { id: station.tripId } }}
+          as={`/trips?id=${station.tripId}`}
         >
           <a className="d-flex align-items-center ml-2">
             <ChevronLeft />
@@ -131,7 +75,7 @@ export default () => {
             inputMode="decimal"
             value={station.id}
             onChange={(e) => {
-              setStation({ ...station, id: e.target.value })
+              setStation({ ...station, stationId: e.target.value })
               save()
             }}
           />
@@ -232,30 +176,10 @@ export default () => {
             }
           />
         </FormGroup>
-        <Row className="justify-content-between">
-          <Col xs="auto" className="d-flex align-items-center">
-            <Link
-              href={{ pathname: '/trips', query: { id: tripId } }}
-              as={`/trips?id=${tripId}`}
-            >
-              <a className="list-group-item text-dark p-2">Cancel and Back</a>
-            </Link>
-          </Col>
-          <Col xs="auto">
-            <Button value="submit" color="primary">
-              Save and Continue
-            </Button>
-          </Col>
-        </Row>
       </Form>
       <Weather weather={null} />
       <h1>Frames</h1>
-      <Link
-        href={{ pathname: '/trips/stations/frames', query: { tripId } }}
-        as={`/trips/stations/frames?tripId=${tripId}`}
-      >
-        <a className="btn btn-primary">Add Drop Frame</a>
-      </Link>
+      <Button>Add Drop Frame</Button>
     </>
   )
 }
