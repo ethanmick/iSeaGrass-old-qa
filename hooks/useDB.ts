@@ -52,7 +52,6 @@ const useStore = <T>(
 ): StoreByKeyHook<T> => {
   const TIMEOUT = 5000
   const id = useQuery('id')
-  console.log('ID', id)
   const { db } = useDB()
   const [loading, setLoading] = useState<boolean>(true)
   const [value, setValue] = useState<T | undefined>(undefined)
@@ -69,7 +68,6 @@ const useStore = <T>(
   }, [id, value])
 
   useEffect(() => {
-    console.log('effect', db, id)
     ;(async function () {
       if (db && id) {
         try {
@@ -94,11 +92,8 @@ export const useTrip = (): StoreByKeyHook<Trip> => {
     db: IDBPDatabase<Database>,
     trip: Trip
   ): Promise<Trip> => {
-    console.log('Helper')
     const query = IDBKeyRange.only(trip.id)
-    console.log('query', query)
     const stations = await db.getAllFromIndex(STATION_STORE, 'tripId', query)
-    console.log('helper', stations)
     return {
       ...trip,
       stations

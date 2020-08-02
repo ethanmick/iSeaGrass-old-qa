@@ -1,19 +1,23 @@
-import { ChevronLeft, DataError, Loading } from 'components'
+import { ChevronLeft, DataError, Loading, Location } from 'components'
 import { Weather } from 'components/Weather'
+import { STATION_STORE } from 'db'
 import { useStation } from 'hooks'
 import { Station } from 'models'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import {
-  Button,
-  ButtonGroup,
-  Col,
-  Form,
-  FormGroup,
-  Input,
-  Label
-} from 'reactstrap'
+import { Button, ButtonGroup, Form, FormGroup, Input, Label } from 'reactstrap'
+
+/*
+const LocationDiscloser = () => {
+  const [open, setOpen] = useState(false)
+  return (
+    <Disclose header={null} action={null} open={open} setOpen={setOpen}>
+      <Location />
+    </Disclose>
+  )
+}
+*/
 
 export default () => {
   const router = useRouter()
@@ -22,23 +26,12 @@ export default () => {
   useEffect(() => {
     if (value) setStation(value)
   }, [value])
-
-  // TODO: Move to a component
-  //const { latitude, longitude, error: gpsError } = usePosition()
-  // useWeather()
-
-  /*
+  // Save Effect
   useEffect(() => {
-    if (latitude || longitude) {
-      setStation({
-        ...station,
-        latitude: latitude.toFixed(6),
-        longitude: longitude.toFixed(6),
-        gpsDevice: 'phone'
-      })
+    if (station) {
+      db.put(STATION_STORE, station)
     }
-  }, [latitude, longitude])
-  */
+  }, [station])
 
   if (error) return <DataError error={error.message} />
   if (loading) return <Loading />
@@ -65,7 +58,7 @@ export default () => {
         </Link>
       </div>
       <Form onSubmit={save} className="px-3">
-        <h3 className="font-weight-light">Station {station.id}</h3>
+        <h3 className="font-weight-light">Station {station.stationId}</h3>
         <FormGroup>
           <Label for="station">Station Number</Label>
           <Input
@@ -73,10 +66,9 @@ export default () => {
             id="station"
             required={true}
             inputMode="decimal"
-            value={station.id}
+            value={station.stationId}
             onChange={(e) => {
               setStation({ ...station, stationId: e.target.value })
-              save()
             }}
           />
         </FormGroup>
@@ -133,49 +125,7 @@ export default () => {
             onChange={(e) => setStation({ ...station, harbor: e.target.value })}
           />
         </FormGroup>
-        <FormGroup row>
-          <Col xs="12">
-            <Label for="location">Location</Label>
-          </Col>
-          <Col xs="6">
-            <Input
-              type="number"
-              id="latitude"
-              inputMode="decimal"
-              required={true}
-              placeholder="Latitude"
-              value={station.latitude}
-              onChange={(e) =>
-                setStation({ ...station, latitude: e.target.value })
-              }
-            />
-          </Col>
-          <Col xs="6">
-            <Input
-              type="number"
-              id="longitude"
-              inputMode="decimal"
-              required={true}
-              placeholder="Longitude"
-              value={station.longitude}
-              onChange={(e) =>
-                setStation({ ...station, longitude: e.target.value })
-              }
-            />
-          </Col>
-        </FormGroup>
-        <FormGroup>
-          <Label for="gpsDevice">GPS Device</Label>
-          <Input
-            type="text"
-            id="gpsDevice"
-            required={true}
-            value={station.gpsDevice}
-            onChange={(e) =>
-              setStation({ ...station, gpsDevice: e.target.value })
-            }
-          />
-        </FormGroup>
+        <Location />
       </Form>
       <Weather weather={null} />
       <h1>Frames</h1>
