@@ -2,9 +2,9 @@ import * as admin from 'firebase-admin'
 import { mapValues } from 'lodash'
 import { Trip } from 'models/index'
 import { NextApiRequest, NextApiResponse } from 'next'
-// const cert = JSON.parse(process.env.FIREBASE_CONFIG ?? '{}')
-const cert = require('../../seegrass-2ebfd-9d22aa297bc7.json')
-// This stopes the admin from initializing more than 1 time
+const cert = process.env.FIREBASE_CONFIG
+  ? JSON.parse(process.env.FIREBASE_CONFIG)
+  : require('../../seegrass-2ebfd-9d22aa297bc7.json')
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(cert)
