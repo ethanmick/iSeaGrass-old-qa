@@ -1,9 +1,7 @@
 import stringify from 'csv-stringify'
 import * as admin from 'firebase-admin'
 import { NextApiRequest, NextApiResponse } from 'next'
-const cert = process.env.FIREBASE_CONFIG
-  ? JSON.parse(process.env.FIREBASE_CONFIG)
-  : require('../../../seegrass-2ebfd-9d22aa297bc7.json')
+const cert = JSON.parse(process.env.FIREBASE_CONFIG ?? '{}')
 // This stopes the admin from initializing more than 1 time
 if (!admin.apps.length) {
   admin.initializeApp({
