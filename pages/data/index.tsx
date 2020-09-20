@@ -24,31 +24,42 @@ interface TripItemProps {
   trip: Trip
 }
 
-const TripItem = ({ trip }: TripItemProps) => (
-  <div className="list-group-item text-dark p-2">
-    <Row>
-      <Col xs="10">
-        <div>Trip with {compact(trip.crew).join(', ')}</div>
-        <small className="text-muted">
-          {moment(trip.date).format('MMMM Do, YYYY')}
-        </small>
-      </Col>
-      <Col xs="2" className="d-flex align-items-center">
-        <a
-          className="btn btn-primary"
-          color="primary"
-          target="_blank"
-          href={`/api/csv/${trip.uuid}`}
-        >
-          <div className="d-flex align-items-center justify-content-center">
-            <Download />
-            <span className="ml-2 d-none d-md-inline-block">Download</span>
-          </div>
-        </a>
-      </Col>
-    </Row>
-  </div>
-)
+const TripItem = ({ trip }: TripItemProps) => {
+  const onClick = (href: string) => (e: React.MouseEvent<any>) => {
+    var a = document.createElement('a')
+    a.setAttribute('href', href)
+    a.setAttribute('target', '_blank')
+    a.dispatchEvent(
+      new MouseEvent('click', { view: window, bubbles: true, cancelable: true })
+    )
+  }
+
+  return (
+    <div className="list-group-item text-dark p-2">
+      <Row>
+        <Col xs="10">
+          <div>Trip with {compact(trip.crew).join(', ')}</div>
+          <small className="text-muted">
+            {moment(trip.date).format('MMMM Do, YYYY')}
+          </small>
+        </Col>
+        <Col xs="2" className="d-flex align-items-center">
+          <a
+            className="btn btn-primary"
+            color="primary"
+            target="_blank"
+            onClick={onClick(`/api/csv/${trip.uuid}`)}
+          >
+            <div className="d-flex align-items-center justify-content-center">
+              <Download />
+              <span className="ml-2 d-none d-md-inline-block">Download</span>
+            </div>
+          </a>
+        </Col>
+      </Row>
+    </div>
+  )
+}
 
 export default () => {
   const [after, setAfter] = useState(moment().subtract(1, 'year').toDate())
