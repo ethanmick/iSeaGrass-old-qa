@@ -7,13 +7,14 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import 'react-datepicker/dist/react-datepicker.css'
+import idbReady from 'safari-14-idb-fix'
 import 'styles/index.css'
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [db, setDB] = useState<IDBPDatabase<Database>>(undefined)
   // Open connection on app initialization
   useEffect(() => {
-    connect().then(setDB)
+    idbReady().then(connect).then(setDB)
   }, [])
   return (
     <DatabaseContext.Provider value={{ db, setDB }}>
